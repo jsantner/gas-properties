@@ -94,7 +94,7 @@ class GasProps(ttk.Frame):
         
         # Final Conditions
         ttk.Separator(self, orient='vertical').grid(column=3, row=0,
-                                                    rowspan=20, sticky='ns')
+                                                    rowspan=25, sticky='ns')
         
         self.T_f = tkinter.StringVar()
         self.P_f = tkinter.StringVar()
