@@ -8,3 +8,9 @@ more advanced tools such as cantera and chemkin. Unfortunately, I found that Gas
 operating systems.
 
 So, I set out to build a simple GUI in python that has similar functionality to GasEq
+
+
+Installation:
+This program is written for python 3. Install it via www.python.org.
+For a more user-friendly installation experience that includes many dependencies, install Anaconda: https://www.continuum.io/downloads
+This program also depends on cantera. See http://www.cantera.org/docs/sphinx/html/install.html for installation instructions
