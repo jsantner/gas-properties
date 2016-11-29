@@ -225,12 +225,12 @@ class GasProps(ttk.Frame):
         outputs = []
         for inp in inputs:
             out = inp.get()
-            if not out.isdigit():
+            try:
+                out = float(out)
+            except ValueError:
                 out = None
-            elif float(out) == 0:
+            if out == 0:
                 out = None
-            else:
-                out = float(inp.get())
             outputs.append(out)
         T, P, H, S, D, U = outputs
 
@@ -249,13 +249,13 @@ class GasProps(ttk.Frame):
             elif U is not None and D is not None:
                 self.initial_type = 'UV'
             else:
-                tkinter.messagebox.showerror('Error', 'Must input exactly two'
-                                             'state variables'
+                tkinter.messagebox.showerror('Error', 'Must input exactly two '
+                                             'state variables '
                                              '(TP, HP, SP, SD, UV)')
                 return
         elif self.initial_type is None:
-            tkinter.messagebox.showerror('Error', 'Must input exactly two'
-                                         'state variables'
+            tkinter.messagebox.showerror('Error', 'Must input exactly two '
+                                         'state variables '
                                          '(TP, HP, SP, SD, UD)')
             return
 
@@ -357,8 +357,8 @@ class GasProps(ttk.Frame):
             elif U is not None and D is not None:
                 self.final_type = 'UV'
             else:
-                tkinter.messagebox.showerror('Error', 'Must input exactly two'
-                                             'state variables'
+                tkinter.messagebox.showerror('Error', 'Must input exactly two '
+                                             'state variables '
                                              '(TP, HP, SP, SD, UV)')
                 return
         elif len([x for x in [T, P, H, S, D, U] if x is not None]) == 0:
@@ -367,8 +367,8 @@ class GasProps(ttk.Frame):
             [x.set(str(y)) for x, y in
              zip(inputs, [self.T, self.P, self.H, self.S, self.D, self.U])]
         elif self.final_type is None:
-            tkinter.messagebox.showerror('Error', 'Must input exactly two'
-                                         'state variables'
+            tkinter.messagebox.showerror('Error', 'Must input exactly two '
+                                         'state variables '
                                          '(TP, HP, SP, SD, UV)')
             return
 
