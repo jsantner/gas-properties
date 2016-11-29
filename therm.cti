@@ -1,3 +1,22 @@
+"""
+ These thermo parameters were taken from the Extended Third Millennium Thermodynamic
+ Database for Combustion and Air-Pollusion Use with updates from Active Thermochemical
+ Tables.
+ Alexander Burcat and Branko Ruscic
+ "Third Millennium Ideal Gas and Condensed Phase Thermochemical Database for
+ Combustion with updates from Active Thermochemical Tables" ANL-05/20 and TAE 960
+ Technion-IIT, Aerospace Engineering, and Argonne National Laboratory, Chemistry
+ Division, September 2005.
+
+ or
+
+ Elke Goos, Alexander Burcat and Branko Ruscic
+ Extended Third Millenium Ideal Gas Thermochemical Database with updates from
+ Active Thermochemical Tables
+ <http://burcat.technion.ac.il/dir>;date.
+ mirrored at <http://garfield.chem.elte.hu/Burcat/burcat.html>;date.
+"""
+
 units(length='cm', time='s', quantity='mol', act_energy='cal/mol')
 
 ideal_gas(name='gas',
@@ -6,7 +25,7 @@ ideal_gas(name='gas',
                      HCN     CN      O2      O3      O       H2      H
                      OH      H2O     CO2     CO      iC8H18  nC7H16  C7H8
                      CH4     CH3     CH2     CH      C2H2    C2H4    C2H6
-                     C3H8    CH3OH   C2H5OH""",
+                     C3H8    CH3OH   C2H5OH  C5H10   C6H12""",
           initial_state=state(temperature=300.0, pressure=OneAtm))
 
 #-------------------------------------------------------------------------------
@@ -98,7 +117,7 @@ species(name='N2O',
         note='L7/88')
 
 species(name='HCN',
-        atoms='N:1 H:1 C:1',
+        atoms='N:1 C:1 H:1',
         thermo=(NASA([200.00, 1000.00],
                      [ 2.25901199E+00,  1.00510475E-02, -1.33514567E-05,
                        1.00920479E-08, -3.00880408E-12,  1.45903166E+04,
@@ -182,7 +201,7 @@ species(name='H',
         note='L6/94')
 
 species(name='OH',
-        atoms='H:1 O:1',
+        atoms='O:1 H:1',
         thermo=(NASA([200.00, 1000.00],
                      [ 3.99198424E+00, -2.40106655E-03,  4.61664033E-06,
                       -3.87916306E-09,  1.36319502E-12,  3.36889836E+03,
@@ -194,7 +213,7 @@ species(name='OH',
         note='HYDROXYLRADIIU3/03')
 
 species(name='H2O',
-        atoms='H:2 O:1',
+        atoms='O:1 H:2',
         thermo=(NASA([200.00, 1000.00],
                      [ 4.19863520E+00, -2.03640170E-03,  6.52034160E-06,
                       -5.48792690E-09,  1.77196800E-12, -3.02937260E+04,
@@ -206,7 +225,7 @@ species(name='H2O',
         note='L5/89')
 
 species(name='CO2',
-        atoms='C:1 O:2',
+        atoms='O:2 C:1',
         thermo=(NASA([200.00, 1000.00],
                      [ 2.35681300E+00,  8.98412990E-03, -7.12206320E-06,
                        2.45730080E-09, -1.42885480E-13, -4.83719710E+04,
@@ -218,7 +237,7 @@ species(name='CO2',
         note='L7/88')
 
 species(name='CO',
-        atoms='C:1 O:1',
+        atoms='O:1 C:1',
         thermo=(NASA([200.00, 1000.00],
                      [ 3.57953350E+00, -6.10353690E-04,  1.01681430E-06,
                        9.07005860E-10, -9.04424490E-13, -1.43440860E+04,
@@ -362,7 +381,7 @@ species(name='C3H8',
         note='g2/00')
 
 species(name='CH3OH',
-        atoms='C:1 O:1 H:4',
+        atoms='O:1 C:1 H:4',
         thermo=(NASA([200.00, 1000.00],
                      [ 5.65851051E+00, -1.62983419E-02,  6.91938156E-05,
                       -7.58372926E-08,  2.80427550E-11, -2.56119736E+04,
@@ -374,7 +393,7 @@ species(name='CH3OH',
         note='MetanolT06/02')
 
 species(name='C2H5OH',
-        atoms='C:2 O:1 H:6',
+        atoms='O:1 C:2 H:6',
         thermo=(NASA([200.00, 1000.00],
                      [ 4.85869570E+00, -3.74017260E-03,  6.95553780E-05,
                       -8.86547960E-08,  3.51688350E-11, -2.99961320E+04,
@@ -384,3 +403,27 @@ species(name='C2H5OH',
                        8.62250110E-10, -5.12897870E-14, -3.15256210E+04,
                       -9.47302020E+00])),
         note='L8/88')
+
+species(name='C5H10',
+        atoms='C:5 H:10',
+        thermo=(NASA([200.00, 1000.00],
+                     [ 3.70339048E+00, -1.15575222E-02,  1.64113330E-04,
+                      -2.09369707E-07,  8.31059426E-11, -1.09388708E+04,
+                       1.19772908E+01]),
+                NASA([1000.00, 6000.00],
+                     [ 9.13283832E+00,  3.01131089E-02, -1.09169275E-05,
+                       1.77298877E-09, -1.06575265E-13, -1.50033856E+04,
+                      -2.92612779E+01])),
+        note='cyclo-g2/01')
+
+species(name='C6H12',
+        atoms='C:6 H:12',
+        thermo=(NASA([200.00, 1000.00],
+                     [ 8.96524961E+00, -7.30015904E-03,  1.33400236E-04,
+                      -1.62499260E-07,  6.22491935E-11, -1.04524950E+04,
+                      -7.69362144E+00]),
+                NASA([1000.00, 6000.00],
+                     [ 1.07253352E+01,  3.46133915E-02, -1.23985588E-05,
+                       1.99405975E-09, -1.18968236E-13, -1.32194553E+04,
+                      -2.81050813E+01])),
+        note='2Me-2enT10/10')
