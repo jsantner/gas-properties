@@ -323,12 +323,12 @@ class GasProps(ttk.Frame):
         outputs = []
         for inp in inputs:
             out = inp.get()
-            if not out.isdigit():
+            try:
+                out = float(out)
+            except ValueError:
                 out = None
-            elif float(out) == 0:
+            if out == 0:
                 out = None
-            else:
-                out = float(inp.get())
             outputs.append(out)
         T, P, H, S, D, U = outputs
 
