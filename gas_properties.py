@@ -15,7 +15,8 @@ import cantera
 
 class GasProps(ttk.Frame):
     "Main window"
-    fmt = '{:^15.4g}'  # Number format used throughout
+    fmt = '{:.6g}'  # Number format used throughout
+    short_fmt = '{:.4g}'  # Number format used throughout
 
     def __init__(self, parent, *args, **kwargs):
         ttk.Frame.__init__(self, parent, *args, **kwargs)
@@ -41,7 +42,7 @@ class GasProps(ttk.Frame):
             spec = ttk.Entry(self, width=10, textvariable=specie)
             spec.grid(column=0, row=i+1)
             val = tkinter.DoubleVar()
-            vals = ttk.Entry(self, width=10, textvariable=val)
+            vals = ttk.Entry(self, width=12, textvariable=val)
             vals.grid(column=1, row=i+1)
             species.append(specie)
             species_vals.append(val)
@@ -49,9 +50,9 @@ class GasProps(ttk.Frame):
         self.species_vals = species_vals
         int_row = i + 1  # Intermediate row
         self.phi = tkinter.StringVar()
-        self.phi_entry = ttk.Entry(self, width=5, textvariable=self.phi)
+        self.phi_entry = ttk.Entry(self, width=10, textvariable=self.phi)
         self.phi_entry.grid(column=1, row=int_row+1)
-        self.phi.trace('w', self.change_phi)  # Run change_phi when value changes
+        self.phi.trace('w', self.change_phi)  # Run when value changes
         ttk.Label(self, text='Equivalence Ratio').grid(column=0, row=int_row+1)
         ttk.Label(self, text='Species').grid(column=0, row=0)
         ttk.Label(self, text='Relative Moles').grid(column=1, row=0)
@@ -69,12 +70,12 @@ class GasProps(ttk.Frame):
         self.D = tkinter.StringVar()
         self.U = tkinter.StringVar()
 
-        self.T_entry = ttk.Entry(self, width=10, textvariable=self.T)
-        self.P_entry = ttk.Entry(self, width=10, textvariable=self.P)
-        self.H_entry = ttk.Entry(self, width=10, textvariable=self.H)
-        self.S_entry = ttk.Entry(self, width=10, textvariable=self.S)
-        self.D_entry = ttk.Entry(self, width=10, textvariable=self.D)
-        self.U_entry = ttk.Entry(self, width=10, textvariable=self.U)
+        self.T_entry = ttk.Entry(self, width=12, textvariable=self.T)
+        self.P_entry = ttk.Entry(self, width=12, textvariable=self.P)
+        self.H_entry = ttk.Entry(self, width=12, textvariable=self.H)
+        self.S_entry = ttk.Entry(self, width=12, textvariable=self.S)
+        self.D_entry = ttk.Entry(self, width=12, textvariable=self.D)
+        self.U_entry = ttk.Entry(self, width=12, textvariable=self.U)
         self.initial_entries = [self.T_entry, self.P_entry, self.H_entry,
                                 self.S_entry, self.D_entry, self.U_entry]
 
@@ -103,12 +104,12 @@ class GasProps(ttk.Frame):
         self.D_f = tkinter.StringVar()
         self.U_f = tkinter.StringVar()
 
-        self.T_f_entry = ttk.Entry(self, width=10, textvariable=self.T_f)
-        self.P_f_entry = ttk.Entry(self, width=10, textvariable=self.P_f)
-        self.H_f_entry = ttk.Entry(self, width=10, textvariable=self.H_f)
-        self.S_f_entry = ttk.Entry(self, width=10, textvariable=self.S_f)
-        self.D_f_entry = ttk.Entry(self, width=10, textvariable=self.D_f)
-        self.U_f_entry = ttk.Entry(self, width=10, textvariable=self.U_f)
+        self.T_f_entry = ttk.Entry(self, width=12, textvariable=self.T_f)
+        self.P_f_entry = ttk.Entry(self, width=12, textvariable=self.P_f)
+        self.H_f_entry = ttk.Entry(self, width=12, textvariable=self.H_f)
+        self.S_f_entry = ttk.Entry(self, width=12, textvariable=self.S_f)
+        self.D_f_entry = ttk.Entry(self, width=12, textvariable=self.D_f)
+        self.U_f_entry = ttk.Entry(self, width=12, textvariable=self.U_f)
         self.final_entries = [self.T_f_entry, self.P_f_entry, self.H_f_entry,
                               self.S_f_entry, self.D_f_entry, self.U_f_entry]
 
@@ -142,19 +143,44 @@ class GasProps(ttk.Frame):
         self.root.config(menu=self.menubar)
 
         # Problem type radio buttons
+        ttk.Label(self, text='Problem Type').grid(column=4, row=0)
         self.problem_type = tkinter.IntVar()
         ttk.Radiobutton(self, text='Chemically Frozen',
-                        variable=self.problem_type, value=0).grid(column=4,
-                                                                  row=0)
+                        variable=self.problem_type, value=0,
+                        command=self.change_ptype).grid(column=4, row=1)
         ttk.Radiobutton(self, text='Isentropic Compression. cr:',
-                        variable=self.problem_type, value=1).grid(column=4,
-                                                                  row=1)
+                        variable=self.problem_type, value=1,
+                        command=self.change_ptype).grid(column=4, row=2)
         ttk.Radiobutton(self, text='Chemical Equilibrium',
-                        variable=self.problem_type, value=2).grid(column=4,
-                                                                  row=2)
+                        variable=self.problem_type, value=2,
+                        command=self.change_ptype).grid(column=4, row=3)
         self.cr = tkinter.StringVar()
         self.cr_Entry = ttk.Entry(self, width=5, textvariable=self.cr)
-        self.cr_Entry.grid(column=5, row=1)
+        self.cr_Entry.grid(column=5, row=2)
+        self.cr.trace('w', self.change_cr)
+
+        self.final_type_int = tkinter.IntVar()
+        self.finaltype_buttons = [
+                ttk.Radiobutton(self, text='TP', variable=self.final_type_int,
+                                command=self.change_ftype, value=0),
+                ttk.Radiobutton(self, text='HP', variable=self.final_type_int,
+                                command=self.change_ftype, value=1),
+                ttk.Radiobutton(self, text='SP', variable=self.final_type_int,
+                                command=self.change_ftype, value=2),
+                ttk.Radiobutton(self, text='SD', variable=self.final_type_int,
+                                command=self.change_ftype, value=3),
+                ttk.Radiobutton(self, text='UV', variable=self.final_type_int,
+                                command=self.change_ftype, value=4),
+                ttk.Radiobutton(self, text='Manual',
+                                variable=self.final_type_int,
+                                command=self.change_ftype, value=5)
+                ]
+
+        count = 5
+        for button in self.finaltype_buttons:
+            button.grid(column=4, row=count)
+#            button.state(statespec=['disabled'])
+            count += 1
 
         # Calculated mixture properties
         self.calc_labels = ['Cp (J/kg/K)', 'Cv (J/kg/K', 'gamma',
@@ -171,9 +197,9 @@ class GasProps(ttk.Frame):
         for label in self.calc_labels:
             init = tkinter.StringVar()
             final = tkinter.StringVar()
-            ttk.Entry(self, width=10, textvariable=init,
+            ttk.Entry(self, width=12, textvariable=init,
                       state='readonly').grid(column=0, row=i)
-            ttk.Entry(self, width=10, textvariable=final,
+            ttk.Entry(self, width=12, textvariable=final,
                       state='readonly').grid(column=2, row=i)
             ttk.Label(self, text=label).grid(column=1, row=i)
             i += 1
@@ -194,7 +220,7 @@ class GasProps(ttk.Frame):
             val = tkinter.StringVar()
             ttk.Entry(self, width=10, textvariable=spec,
                       state='readonly').grid(column=4, row=ind)
-            ttk.Entry(self, width=10, textvariable=val,
+            ttk.Entry(self, width=12, textvariable=val,
                       state='readonly').grid(column=5, row=ind)
             final_spec.append(spec)
             final_mole_frac.append(val)
@@ -207,6 +233,75 @@ class GasProps(ttk.Frame):
     def on_quit(self):
         """ Exits program. """
         quit()
+
+    def change_ptype(self):
+        """ Change the problem type. """
+        problem_type = self.problem_type.get()
+
+        if problem_type == 0:
+            # Chemically frozen
+            spec = 'normal'
+        elif problem_type == 1:
+            # Isentropic Compression
+            spec = 'disabled'
+            self.final_type_int.set(5)
+        elif problem_type == 2:
+            # Chemical Equilibrium
+            spec = 'normal'
+
+        for button in self.finaltype_buttons:
+            button['state'] = spec
+
+        self.change_ftype()  # Update
+
+    def change_ftype(self):
+        """ Change the final type (TP, HP, SP, SD, UV) """
+        # Use radio buttons to write known final state variables
+        final_type_int = self.final_type_int.get()
+
+        # Reset all text to black
+        [x.config(foreground='black') for x in self.final_entries]
+
+        # Delete all final states
+        for item in self.final_entries:
+            item.delete(0, tkinter.END)
+
+        if final_type_int == 0:
+            self.T_f.set(self.T.get())
+            self.P_f.set(self.P.get())
+        if final_type_int == 1:
+            self.H_f.set(self.H.get())
+            self.P_f.set(self.P.get())
+        if final_type_int == 2:
+            self.S_f.set(self.S.get())
+            self.P_f.set(self.P.get())
+        if final_type_int == 3:
+            self.S_f.set(self.S.get())
+            self.D_f.set(self.D.get())
+        if final_type_int == 4:
+            self.U_f.set(self.U.get())
+            self.D_f.set(self.D.get())
+
+        # Reset calculated properties
+        for var, attr in zip(self.final_calc, self.calc_calls):
+            var.set('')
+        for i in range(len(self.final_spec)):
+            self.final_spec[i].set('')
+            self.final_mole_frac[i].set('')
+
+        self.calculate_final()
+
+    def change_cr(self, *args):
+        """ Update items when compression ratio is changed. """
+        if self.cr.get()[-1] == 0:
+            # Don't update if last character is zero.
+            return
+        try:
+            self.S_f.set(self.S.get())
+            self.D_f.set(float(self.D.get()) * float(self.cr.get()))
+        except ValueError:
+            self.S_f.set('')
+            self.D_f.set('')
 
     def calculate_initial(self):
         """ Calculate initial conditions and display results """
@@ -297,7 +392,8 @@ class GasProps(ttk.Frame):
             self.gas = gas
 
             # Display Results
-            self.phi.set(str(equivalence_ratio(gas, gas_list)[0]))
+            self.phi.set(self.short_fmt.format(
+                    equivalence_ratio(gas, gas_list)[0]))
             H, P = gas.HP
             T, D = gas.TD
             S = gas.s
@@ -318,6 +414,8 @@ class GasProps(ttk.Frame):
         # Update Initial Conditions
         self.calculate_initial()
 
+        problem_type = self.problem_type.get()
+
         # Read thermodynamic state variables
         inputs = [self.T_f, self.P_f, self.H_f, self.S_f, self.D_f, self.U_f]
         outputs = []
@@ -333,7 +431,7 @@ class GasProps(ttk.Frame):
         T, P, H, S, D, U = outputs
 
         # Find the problem type
-        if self.problem_type.get() == 1:  # Isentropic Compression
+        if problem_type == 1:  # Isentropic Compression
             T, P, H, S, D, U = [None]*6
             S = float(self.S.get())  # Final entropy = initial entropy
             try:
@@ -344,6 +442,8 @@ class GasProps(ttk.Frame):
                                              'must be a number')
                 return
         if len([x for x in [T, P, H, S, D, U] if x is not None]) == 2:
+            # This block could be simplified and just look at final_type_int.
+            # But, doing it this way serves as a check
             if T is not None and P is not None:
                 self.final_type = 'TP'
             elif H is not None and P is not None:
@@ -362,10 +462,7 @@ class GasProps(ttk.Frame):
                                              '(TP, HP, SP, SD, UV)')
                 return
         elif len([x for x in [T, P, H, S, D, U] if x is not None]) == 0:
-            # Copy from initial conditions. Useful for equilibrium calcs
-            self.final_type = self.initial_type
-            [x.set(str(y)) for x, y in
-             zip(inputs, [self.T, self.P, self.H, self.S, self.D, self.U])]
+            self.change_ptype()  # Update problem type.
         elif self.final_type is None:
             tkinter.messagebox.showerror('Error', 'Must input exactly two '
                                          'state variables '
@@ -374,6 +471,7 @@ class GasProps(ttk.Frame):
 
         # Reset all text to black
         [x.config(foreground='black') for x in self.final_entries]
+
         # Change state variables, re-calculate gas state
         try:
             if self.final_type == 'TP':
@@ -400,11 +498,8 @@ class GasProps(ttk.Frame):
                 self.gas.UV = U, 1/D
                 self.U_f_entry.config(foreground='red')
                 self.D_f_entry.config(foreground='red')
-            if self.problem_type.get() == 2:  # Equilibrate
-                if self.final_type == 'TD':
-                    equil_key = 'TV'
-                else:
-                    equil_key = self.final_type
+            if problem_type == 2:  # Equilibrate
+                equil_key = self.final_type.replace('D', 'V')
                 self.gas.equilibrate(equil_key)
 
         except RuntimeError as e:  # Cantera has a problem
@@ -440,6 +535,11 @@ class GasProps(ttk.Frame):
         """Change the equivalence ratio by changing fuel content,
         holding diluent/o2 ratio constant.
         """
+        if self.phi.get() == '':
+            return
+        if self.phi.get()[-1] == 0:
+            # Don't update if last character is 0.
+            return
         try:
             new_phi = float(self.phi.get())
         except ValueError:
@@ -462,7 +562,7 @@ class GasProps(ttk.Frame):
             if row[0] in fuels:
                 row[1] *= new_phi / phi
             self.species[i].set(row[0])
-            self.species_vals[i].set(row[1])
+            self.species_vals[i].set(self.fmt.format(row[1]))
 
         # Reset variables before re-calculating initial state
         if self.initial_type == 'TP':
@@ -481,7 +581,7 @@ class GasProps(ttk.Frame):
             self.T.set(0)
             self.P.set(0)
             self.H.set(0)
-        self.calculate_initial()  # Re-calculate initial state
+        self.calculate_final()  # Re-calculate
 
 
 def equivalence_ratio(gas, gas_list):
