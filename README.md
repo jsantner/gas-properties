@@ -33,5 +33,6 @@ You can then calculate the final condition in three ways
   3. Chemical Equilibrium: Choose two state variables for the final condition, and the other properties will be calculated 
       after allowing the mixture to reach chemical equilibrium.
 
-In order to change your "fixed" state variables (the red ones), delete all state variables except for the two that you 
-want to fix.
+The "fixed" state variables (the red ones), are determined using the radio buttons (TP, UV, etc.). 
+If you want these state variables to be determined, but not held constant from the initial state, use "manual," which allows
+the user to set two properties for the final state.
