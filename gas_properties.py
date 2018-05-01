@@ -138,6 +138,7 @@ class GasProps(ttk.Frame):
         self.menubar = tkinter.Menu(self.root)
         self.menu_file = tkinter.Menu(self.menubar)
         self.menu_file.add_command(label='Exit', command=self.on_quit)
+        self.menu_file.add_command(label='Open Chem. File',command=self.openf)
         self.menu_edit = tkinter.Menu(self.menubar)
         self.menubar.add_cascade(menu=self.menu_file, label='File')
         self.root.config(menu=self.menubar)
@@ -227,9 +228,11 @@ class GasProps(ttk.Frame):
         self.final_spec = final_spec
         self.final_mole_frac = final_mole_frac
 
-        # Temporary - allow user to choose thermochemistry file in future
-        self.chemfile = os.path.join(sys.path[0], 'therm.cti')
-
+        # Allows user to choose thermochemistry file from Menu
+    def openf(self):
+        """ Opens chemistry file """
+        self.chemfile=tkinter.filedialog.askopenfilename()
+   
     def on_quit(self):
         """ Exits program. """
         quit()
