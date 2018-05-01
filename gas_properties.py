@@ -8,6 +8,7 @@ Created by Jeffrey Santner
 import os
 import sys
 import tkinter
+from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 import cantera
@@ -232,7 +233,7 @@ class GasProps(ttk.Frame):
     def openf(self):
         """ Opens chemistry file """
         self.chemfile=tkinter.filedialog.askopenfilename()
-   
+
     def on_quit(self):
         """ Exits program. """
         quit()
