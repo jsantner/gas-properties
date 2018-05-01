@@ -228,6 +228,9 @@ class GasProps(ttk.Frame):
             final_mole_frac.append(val)
         self.final_spec = final_spec
         self.final_mole_frac = final_mole_frac
+        
+        #initialize chemistry file to therm.cti
+        self.chemfile = os.path.join(sys.path[0], 'therm.cti')
 
         # Allows user to choose thermochemistry file from Menu
     def openf(self):
