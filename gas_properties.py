@@ -295,8 +295,7 @@ class GasProps(ttk.Frame):
         for i in range(len(self.final_spec)):
             self.final_spec[i].set('')
             self.final_mole_frac[i].set('')
-
-        self.calculate_final()
+            
 
     def change_cr(self, *args):
         """ Update items when compression ratio is changed. """
