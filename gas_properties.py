@@ -183,7 +183,7 @@ class GasProps(ttk.Frame):
             button.grid(column=4, row=count)
 #            button.state(statespec=['disabled'])
             count += 1
-
+#print
         # Calculated mixture properties
         self.calc_labels = ['Cp (J/kg/K)', 'Cv (J/kg/K', 'gamma',
                             'Gibbs (J/kg)', 'MW (kg/kmol)',
