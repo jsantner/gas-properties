@@ -140,8 +140,14 @@ class GasProps(ttk.Frame):
         self.menu_file = tkinter.Menu(self.menubar)
         self.menu_file.add_command(label='Exit', command=self.on_quit)
         self.menu_file.add_command(label='Open Chem. File', command=self.openf)
-        self.menu_edit = tkinter.Menu(self.menubar)
+#        self.menu_edit = tkinter.Menu(self.menubar)
+#        self.menu_edit.add_command(label='Change Unit System',
+#                                   command=self.units)
+        self.menu_view = tkinter.Menu(self.menubar)
+        self.menu_view.add_command(label='All Species', command=self.view_spec)
         self.menubar.add_cascade(menu=self.menu_file, label='File')
+#        self.menubar.add_cascade(menu=self.menu_edit, label='Edit')
+        self.menubar.add_cascade(menu=self.menu_view, label='View')
         self.root.config(menu=self.menubar)
 
         # Problem type radio buttons
@@ -232,10 +238,38 @@ class GasProps(ttk.Frame):
         # Initialize chemistry file to therm.cti
         self.chemfile = os.path.join(sys.path[0], 'therm.cti')
 
+    def units(self):
+        """ Change the unit system. """
+        # Not implemented yet
+        pass
+
+    def view_spec(self):
+        """ View all available species """
+        try:
+            gas = self.gas
+        except AttributeError:
+            gas = cantera.Solution(self.chemfile)
+
+        t = tkinter.Toplevel(self)  # New window
+        canvas = ttk.tkinter.Canvas(t)
+        scrolly = ttk.Scrollbar(t, orient='vertical', command=canvas.yview)
+        h = 25
+        for i in range(len(gas.species_names)):
+            label = ttk.Label(canvas, text=gas.species_name(i))
+            canvas.create_window(0, i*h, anchor='nw', window=label, height=h)
+
+        canvas.configure(scrollregion=canvas.bbox('all'),
+                         yscrollcommand=scrolly.set)
+
+        canvas.pack(fill='both', expand=True, side='left')
+        scrolly.pack(fill='y', side='right')
+
     def openf(self):
         """ Opens chemistry file """
         # Allows user to choose thermochemistry file from Menu.
-        self.chemfile = tkinter.filedialog.askopenfilename()
+        self.chemfile = tkinter.filedialog.askopenfilename(
+                title='Select Chemistry File', initialdir=os.getcwd(),
+                filetypes=[("Cantera Chemistry File (*.cti)", "*.cti")])
 
     def on_quit(self):
         """ Exits program. """
@@ -295,7 +329,6 @@ class GasProps(ttk.Frame):
         for i in range(len(self.final_spec)):
             self.final_spec[i].set('')
             self.final_mole_frac[i].set('')
-            
 
     def change_cr(self, *args):
         """ Update items when compression ratio is changed. """
@@ -617,6 +650,7 @@ def equivalence_ratio(gas, gas_list):
         fuels.append(row[0])
         alpha += (C + H/4 - O/2) * row[1]
     return (alpha / mol_O2, fuels)
+
 
 if __name__ == "__main__":
     root = tkinter.Tk()
