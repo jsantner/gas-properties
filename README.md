@@ -26,7 +26,7 @@ From a windows command line:
 
     python -i path\to\gas-properties.py
 
-	Or, run gas-properties.py from your preffered python IDE (e.g. spyder, IDLE, etc.) 
+Or, run gas-properties.py from your preffered python IDE (e.g. spyder, IDLE, etc.) 
 
 Usage:
 In the top left, you can input molecules (H2, O2, N2, CH4, iC8H18, nC7H16, etc.) and their relative molar content.
