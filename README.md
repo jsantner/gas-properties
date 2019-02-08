@@ -11,14 +11,22 @@ So, I set out to build a simple GUI in python that has similar functionality to 
 
 
 Installation:
+-------------
 This program is written for python 3. Install it via www.python.org.
-For a more user-friendly installation experience that includes many dependencies, install Anaconda: https://www.continuum.io/downloads
-This program also depends on cantera. See http://www.cantera.org/docs/sphinx/html/install.html for installation instructions
+For a more user-friendly installation experience that includes many dependencies, install Anaconda: https://www.anaconda.com/distribution/
+This program also depends on cantera. See http://www.cantera.org/docs/sphinx/html/install.html for installation instructions. 
+I think the easiest installation method is to open an anaconda prompt and type:
+
+    conda install -c cantera cantera
+
 
 To run:
+-------
 From a windows command line:
+
     python -i path\to\gas-properties.py
-Or, run gas-properties.py from your preffered python IDE (e.g. spyder, IDLE, etc.) 
+
+	Or, run gas-properties.py from your preffered python IDE (e.g. spyder, IDLE, etc.) 
 
 Usage:
 In the top left, you can input molecules (H2, O2, N2, CH4, iC8H18, nC7H16, etc.) and their relative molar content.
