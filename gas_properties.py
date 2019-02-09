@@ -11,6 +11,8 @@ import tkinter
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
+import numpy as np
+
 import cantera
 
 
@@ -32,6 +34,12 @@ class GasProps(ttk.Frame):
         # Initialize Variables
         self.initial_type = None
         self.final_type = None
+
+        # Initialize unit variables
+        self.units = []
+        for unit in ['Pa', 'm', 'J', 'kg']:
+            self.units.append(tkinter.StringVar(value=unit))
+        self.basis = 'mass'
 
         # Mixture creation
         species = []
@@ -140,13 +148,13 @@ class GasProps(ttk.Frame):
         self.menu_file = tkinter.Menu(self.menubar)
         self.menu_file.add_command(label='Exit', command=self.on_quit)
         self.menu_file.add_command(label='Open Chem. File', command=self.openf)
-#        self.menu_edit = tkinter.Menu(self.menubar)
-#        self.menu_edit.add_command(label='Change Unit System',
-#                                   command=self.units)
+        self.menu_edit = tkinter.Menu(self.menubar)
+        self.menu_edit.add_command(label='Change Unit System',
+                                   command=self.unit_menu)
         self.menu_view = tkinter.Menu(self.menubar)
         self.menu_view.add_command(label='All Species', command=self.view_spec)
         self.menubar.add_cascade(menu=self.menu_file, label='File')
-#        self.menubar.add_cascade(menu=self.menu_edit, label='Edit')
+        self.menubar.add_cascade(menu=self.menu_edit, label='Edit')
         self.menubar.add_cascade(menu=self.menu_view, label='View')
         self.root.config(menu=self.menubar)
 
@@ -191,7 +199,7 @@ class GasProps(ttk.Frame):
             count += 1
 
         # Calculated mixture properties
-        self.calc_labels = ['Cp (J/kg/K)', 'Cv (J/kg/K', 'gamma',
+        self.calc_labels = ['Cp (J/kg/K)', 'Cv (J/kg/K)', 'gamma',
                             'Gibbs (J/kg)', 'MW (kg/kmol)',
                             'IsoT compressibility (1/Pa)',
                             'Therm. expansion coeff (1/K)']
@@ -238,10 +246,91 @@ class GasProps(ttk.Frame):
         # Initialize chemistry file to therm.cti
         self.chemfile = os.path.join(sys.path[0], 'therm.cti')
 
-    def units(self):
-        """ Change the unit system. """
-        # Not implemented yet
-        pass
+    def change_units(self):
+        """ Change the unit system.
+
+        This may be easier if using pint, but that would require the user to
+        install another package that isn't included with Anaconda, so I'm doing
+        this the hard way for now."""
+#        P = self.P_unit.get()
+#        L = self.L_unit.get()
+#        E = self.E_unit.get()
+#        Am = self.Am_unit.get()
+#        self.units = [P, L, E, Am]
+        P, L, E, Am = [x.get() for x in self.units]
+        if Am in ['kg', 'g']:
+            self.basis = 'mass'
+        elif Am in ['kmol', 'mol']:
+            self.basis = 'molar'
+
+        int_row = 12
+        ttk.Label(self, text='Temperature (K)').grid(column=1, row=int_row+1)
+        ttk.Label(self, text='Pressure ('+P+')').grid(column=1, row=int_row+2)
+        ttk.Label(self, text='Enthalpy ('+E+'/'+Am+')').grid(column=1,
+                                                             row=int_row+3)
+        ttk.Label(self, text='Entropy ('+E+'/'+Am+'/K)').grid(column=1,
+                                                              row=int_row+4)
+        ttk.Label(self, text='Density ('+Am+'/'+L+'^3)').grid(column=1,
+                                                              row=int_row+5)
+        ttk.Label(self, text='Energy ('+E+'/'+Am+')').grid(column=1,
+                                                           row=int_row+6)
+
+        # Calculated mixture properties
+        self.calc_labels = ['Cp ('+E+'/'+Am+'/K)', 'Cv ('+E+'/'+Am+'/K)',
+                            'gamma', 'Gibbs ('+E+'/'+Am+')', 'MW (kg/kmol)',
+                            'IsoT compressibility (1/'+P+')',
+                            'Therm. expansion coeff (1/K)']
+        i = int_row + 8
+        for label in self.calc_labels:
+            ttk.Label(self, text=label).grid(column=1, row=i)
+            i += 1
+
+        #  Clear all entries. In the future, convert them instead
+        for var in self.final_calc + self.initial_calc:
+            var.set('')
+        for i in range(len(self.final_spec)):
+            self.final_spec[i].set('')
+            self.final_mole_frac[i].set('')
+        for item in self.final_entries + self.initial_entries:
+            item.delete(0, tkinter.END)
+
+    def unit_menu(self):
+        """ Open window to change the unit system. """
+        t = tkinter.Toplevel(self)  # New window
+        ttk.Label(t, text='Choose your units').grid(column=1, row=0)
+
+        # Unit radio buttons
+        ttk.Label(t, text='Pressure').grid(column=1, row=2)
+        counter = 3
+        for unit in ['Pa', 'kPa', 'atm']:
+            ttk.Radiobutton(t, text=unit, variable=self.units[0],
+                            value=unit).grid(column=1, row=counter)
+            counter += 1
+
+        ttk.Label(t, text='Length').grid(column=2, row=2)
+        counter = 3
+        for unit in ['m', 'cm', 'mm', 'ft', 'in']:
+            ttk.Radiobutton(t, text=unit, variable=self.units[1],
+                            value=unit).grid(column=2, row=counter)
+            counter += 1
+
+        ttk.Label(t, text='Energy').grid(column=3, row=2)
+        counter = 3
+        for unit in ['J', 'kJ', 'cal', 'kcal', 'BTU']:
+            ttk.Radiobutton(t, text=unit, variable=self.units[2],
+                            value=unit).grid(column=3, row=counter)
+            counter += 1
+
+        ttk.Label(t, text='Amount').grid(column=4, row=2)
+        counter = 3
+        for unit in ['kg', 'g', 'mol', 'kmol']:
+            ttk.Radiobutton(t, text=unit, variable=self.units[3],
+                            value=unit).grid(column=4, row=counter)
+            counter += 1
+
+        self.unit_button = ttk.Button(t, text='Update Unit System',
+                                      command=self.change_units)
+        self.unit_button.grid(column=3, row=0)
 
     def view_spec(self):
         """ View all available species """
@@ -344,7 +433,6 @@ class GasProps(ttk.Frame):
 
     def calculate_initial(self):
         """ Calculate initial conditions and display results """
-
         # Normalize and create mixture
         gas_list = []
         for spec, val in zip(self.species, self.species_vals):
@@ -354,18 +442,8 @@ class GasProps(ttk.Frame):
         self.gas_list = [[x[0], x[1]/total] for x in gas_list]
         reactants = ', '.join(['{:}:{:.5f}'.format(*x) for x in gas_list])
 
-        # Read thermodynamic state variables
         inputs = [self.T, self.P, self.H, self.S, self.D, self.U]
-        outputs = []
-        for inp in inputs:
-            out = inp.get()
-            try:
-                out = float(out)
-            except ValueError:
-                out = None
-            if out == 0:
-                out = None
-            outputs.append(out)
+        outputs = self.read_state('I')
         T, P, H, S, D, U = outputs
 
         # Find the problem type
@@ -395,6 +473,7 @@ class GasProps(ttk.Frame):
 
         # Create the cantera Solution object
         gas = cantera.Solution(self.chemfile)
+        gas.basis = self.basis
 
         # Reset all text to black
         [x.config(foreground='black') for x in self.initial_entries]
@@ -437,45 +516,38 @@ class GasProps(ttk.Frame):
             T, D = gas.TD
             S = gas.s
             U = gas.u
-            [x.set(self.fmt.format(y))
-             for x, y in zip(inputs, [T, P, H, S, D, U])]
+            unit_strs = [x.get() for x in self.units]
+            converted = convert_units([T, P, H, S, D, U], unit_strs, False)
+            [x.set(self.fmt.format(y)) for x, y in zip(inputs, converted)]
 
             # More calculated properties
-            for var, attr in zip(self.initial_calc, self.calc_calls):
+            mults = convert_units([1, 1, 1, 1, 1, 1, 1], unit_strs, False)
+            for var, attr, mult in zip(self.initial_calc, self.calc_calls, mults):
                 if attr == 'GAMMA':
                     var.set(self.fmt.format(gas.cp/gas.cv))
                 else:
-                    var.set(self.fmt.format(getattr(gas, attr)))
+                    var.set(self.fmt.format(mult * getattr(gas, attr)))
 
     def calculate_final(self):
         """ Calculate the final conditions. """
 
         # Update Initial Conditions
         self.calculate_initial()
-
+        initial_state = self.read_state('I')
         problem_type = self.problem_type.get()
 
         # Read thermodynamic state variables
         inputs = [self.T_f, self.P_f, self.H_f, self.S_f, self.D_f, self.U_f]
-        outputs = []
-        for inp in inputs:
-            out = inp.get()
-            try:
-                out = float(out)
-            except ValueError:
-                out = None
-            if out == 0:
-                out = None
-            outputs.append(out)
+        outputs = self.read_state('F')
         T, P, H, S, D, U = outputs
 
         # Find the problem type
         if problem_type == 1:  # Isentropic Compression
             T, P, H, S, D, U = [None]*6
-            S = float(self.S.get())  # Final entropy = initial entropy
+            S = initial_state[3]  # Final entropy = initial entropy
             try:
                 # Change density due to compression / expansion
-                D = float(self.D.get()) * float(self.cr.get())
+                D = initial_state[4] * float(self.cr.get())
             except ValueError:
                 tkinter.messagebox.showerror('Error', 'compression ratio'
                                              'must be a number')
@@ -551,15 +623,17 @@ class GasProps(ttk.Frame):
             T, D = gas.TD
             S = gas.s
             U = gas.u
-            [x.set(self.fmt.format(y)) for x, y in
-             zip(inputs, [T, P, H, S, D, U])]
+            unit_strs = [x.get() for x in self.units]
+            converted = convert_units([T, P, H, S, D, U], unit_strs, False)
+            [x.set(self.fmt.format(y)) for x, y in zip(inputs, converted)]
 
             # More calculated properties
-            for var, attr in zip(self.final_calc, self.calc_calls):
+            mults = convert_units([1, 1, 1, 1, 1, 1, 1], unit_strs, False)
+            for var, attr, mult in zip(self.final_calc, self.calc_calls, mults):
                 if attr == 'GAMMA':
                     var.set(self.fmt.format(gas.cp/gas.cv))
                 else:
-                    var.set(self.fmt.format(getattr(gas, attr)))
+                    var.set(self.fmt.format(mult * getattr(gas, attr)))
 
             # Final mole fractions
             i = 0
@@ -621,6 +695,79 @@ class GasProps(ttk.Frame):
             self.P.set(0)
             self.H.set(0)
         self.calculate_final()  # Re-calculate
+
+    def read_state(self, key):
+        """ Read the entire input state, convert to mks units. """
+        # Read thermodynamic state variables
+        if key == 'I':
+            inputs = [self.T, self.P, self.H, self.S, self.D, self.U]
+        elif key == 'F':
+            inputs = [self.T_f, self.P_f, self.H_f, self.S_f, self.D_f,
+                      self.U_f]
+        outputs = []
+        for inp in inputs:
+            out = inp.get()
+            try:
+                out = float(out)
+            except ValueError:
+                out = None
+            if out == 0:
+                out = None
+            outputs.append(out)
+
+        return convert_units(outputs, [x.get() for x in self.units], True)
+
+
+def convert_units(vals, units, to_mks):
+    """ Convert between unit systems.
+
+    vals: list of floats
+        values to be displayed in the following order:
+        [Temperature, Pressure, Enthalpy, Entropy, Density, Internal Energy,
+        cp, cv, gamma, Gibbs, Molar Mass, compressibility,
+        thermal expansion coefficient].
+        vals can be either the first 6, all 13, or the last 7 items.
+    units:
+        list of strings for units of [Pressure, Length]
+    to_mks: bool
+        if True, the vals are already in the system specified by "units" and
+        must be converted to mks. If False, the vals are in mks units and
+        should be converted to the system specified by "units"
+
+    """
+    P_units = {'Pa': 1, 'kPa': 1e-3, 'atm': 1/cantera.one_atm}
+    L_units = {'m': 1, 'cm': 100, 'mm': 1000, 'ft': 3.28084, 'in': 39.3701}
+    E_units = {'J': 1, 'kJ': 1e-3, 'cal': 0.239006, 'kcal': 0.000239006,
+               'BTU': 0.000947817}
+    Am_units = {'kg': 1, 'g': 1e3, 'kmol': 1, 'mol': 1e3}
+
+    vals = np.array(vals)
+    vals[np.where(vals == None)[0]] = 0
+
+    P_conv = P_units[units[0]]
+    L_conv = L_units[units[1]]
+    E_conv = E_units[units[2]]
+    Am_conv = Am_units[units[3]]
+
+    conversion_inps = [1, P_conv, E_conv/Am_conv, E_conv/Am_conv,
+                       Am_conv/L_conv**3, E_conv/Am_conv]
+    conversion_calc = [E_conv/Am_conv, E_conv/Am_conv, 1, E_conv/Am_conv, 1,
+                       1/P_conv, 1]
+
+    if len(vals) == 6:
+        conversion = np.array(conversion_inps)
+    elif len(vals) == 13:
+        conversion = np.array(conversion_inps + conversion_calc)
+    elif len(vals) == 7:
+        conversion = np.array(conversion_calc)
+    else:
+        raise ValueError('convert_units was given an inappropriate number of vals')
+    if to_mks:
+        out = vals / conversion
+    else:
+        out = vals * conversion
+    out[np.where(out == 0)[0]] = None
+    return list(out)
 
 
 def equivalence_ratio(gas, gas_list):
