@@ -244,7 +244,8 @@ class GasProps(ttk.Frame):
         self.final_mole_frac = final_mole_frac
 
         # Initialize chemistry file to therm.cti
-        self.chemfile = os.path.join(sys.path[0], 'therm.cti')
+        path = os.path.dirname(os.path.realpath(__file__))
+        self.chemfile = os.path.join(path, 'therm.cti')
 
     def change_units(self):
         """ Change the unit system.
