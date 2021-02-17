@@ -1,4 +1,4 @@
-""" GUI to calculate gas properties based on cantera.
+"""GUI to calculate gas properties based on cantera.
 
 Designed with similar functionality to GasEq
 
@@ -6,18 +6,16 @@ Created by Jeffrey Santner
 """
 
 import os
-import sys
 import tkinter
-from tkinter import filedialog
 from tkinter import ttk
-from tkinter import messagebox
 import numpy as np
 
 import cantera
 
 
 class GasProps(ttk.Frame):
-    "Main window"
+    """Main window."""
+
     fmt = '{:.6g}'  # Number format used throughout
     short_fmt = '{:.4g}'  # Number format used throughout
 
@@ -27,7 +25,7 @@ class GasProps(ttk.Frame):
         self.init_gui()
 
     def init_gui(self):
-        "Build the GUI."
+        """Build the GUI."""
         self.root.title('Gas Property Calculator')
         self.grid(column=0, row=0, sticky='nsew')
 
@@ -153,9 +151,12 @@ class GasProps(ttk.Frame):
                                    command=self.unit_menu)
         self.menu_view = tkinter.Menu(self.menubar)
         self.menu_view.add_command(label='All Species', command=self.view_spec)
+        self.menu_help = tkinter.Menu(self.menubar)
+        self.menu_help.add_command(label='About', command=self.about)
         self.menubar.add_cascade(menu=self.menu_file, label='File')
         self.menubar.add_cascade(menu=self.menu_edit, label='Edit')
         self.menubar.add_cascade(menu=self.menu_view, label='View')
+        self.menubar.add_cascade(menu=self.menu_help, label='Help')
         self.root.config(menu=self.menubar)
 
         # Problem type radio buttons
@@ -248,11 +249,12 @@ class GasProps(ttk.Frame):
         self.chemfile = os.path.join(path, 'therm.cti')
 
     def change_units(self):
-        """ Change the unit system.
+        """Change the unit system.
 
         This may be easier if using pint, but that would require the user to
         install another package that isn't included with Anaconda, so I'm doing
-        this the hard way for now."""
+        this the hard way for now.
+        """
 #        P = self.P_unit.get()
 #        L = self.L_unit.get()
 #        E = self.E_unit.get()
@@ -296,7 +298,7 @@ class GasProps(ttk.Frame):
             item.delete(0, tkinter.END)
 
     def unit_menu(self):
-        """ Open window to change the unit system. """
+        """Open window to change the unit system."""
         t = tkinter.Toplevel(self)  # New window
         ttk.Label(t, text='Choose your units').grid(column=1, row=0)
 
@@ -334,7 +336,7 @@ class GasProps(ttk.Frame):
         self.unit_button.grid(column=3, row=0)
 
     def view_spec(self):
-        """ View all available species """
+        """View all available species."""
         try:
             gas = self.gas
         except AttributeError:
@@ -354,19 +356,37 @@ class GasProps(ttk.Frame):
         canvas.pack(fill='both', expand=True, side='left')
         scrolly.pack(fill='y', side='right')
 
+    def about(self):
+        """Display the readme."""
+        t = tkinter.Toplevel(self)  # New window
+        canvas = ttk.tkinter.Canvas(t)
+        scrolly = ttk.Scrollbar(t, orient='vertical', command=canvas.yview)
+        h = 50
+        with open('README.md') as f:
+            lines = f.readlines()
+        for i in range(len(lines)):
+            label = ttk.Label(canvas, text=lines[i])
+            canvas.create_window(0, i*h, anchor='nw', window=label, height=h)
+
+        canvas.configure(scrollregion=canvas.bbox('all'),
+                         yscrollcommand=scrolly.set)
+
+        canvas.pack(fill='both', expand=True, side='left')
+        scrolly.pack(fill='y', side='right')
+
     def openf(self):
-        """ Opens chemistry file """
+        """Open chemistry file."""
         # Allows user to choose thermochemistry file from Menu.
         self.chemfile = tkinter.filedialog.askopenfilename(
                 title='Select Chemistry File', initialdir=os.getcwd(),
                 filetypes=[("Cantera Chemistry File (*.cti)", "*.cti")])
 
     def on_quit(self):
-        """ Exits program. """
-        quit()
+        """Exit program."""
+        root.destroy()
 
     def change_ptype(self):
-        """ Change the problem type. """
+        """Change the problem type."""
         problem_type = self.problem_type.get()
 
         if problem_type == 0:
@@ -386,7 +406,7 @@ class GasProps(ttk.Frame):
         self.change_ftype()  # Update
 
     def change_ftype(self):
-        """ Change the final type (TP, HP, SP, SD, UV) """
+        """Change the final type (TP, HP, SP, SD, UV)."""
         # Use radio buttons to write known final state variables
         final_type_int = self.final_type_int.get()
 
@@ -421,7 +441,7 @@ class GasProps(ttk.Frame):
             self.final_mole_frac[i].set('')
 
     def change_cr(self, *args):
-        """ Update items when compression ratio is changed. """
+        """Update items when compression ratio is changed."""
         if self.cr.get()[-1] == 0:
             # Don't update if last character is zero.
             return
@@ -431,13 +451,14 @@ class GasProps(ttk.Frame):
         except ValueError:
             self.S_f.set('')
             self.D_f.set('')
+        self.calculate_final()  # Re-calculate
 
     def calculate_initial(self):
-        """ Calculate initial conditions and display results """
+        """Calculate initial conditions and display results."""
         # Normalize and create mixture
         gas_list = []
         for spec, val in zip(self.species, self.species_vals):
-            if spec.get() is not '' and val.get() is not '':
+            if spec.get() != '' and val.get() != '':
                 gas_list.append([spec.get(), float(val.get())])
         total = sum([x[1] for x in gas_list])
         self.gas_list = [[x[0], x[1]/total] for x in gas_list]
@@ -530,8 +551,7 @@ class GasProps(ttk.Frame):
                     var.set(self.fmt.format(mult * getattr(gas, attr)))
 
     def calculate_final(self):
-        """ Calculate the final conditions. """
-
+        """Calculate the final conditions."""
         # Update Initial Conditions
         self.calculate_initial()
         initial_state = self.read_state('I')
@@ -575,6 +595,11 @@ class GasProps(ttk.Frame):
                 return
         elif len([x for x in [T, P, H, S, D, U] if x is not None]) == 0:
             self.change_ptype()  # Update problem type.
+        elif len([x for x in [T, P, H, S, D, U] if x is not None]) == 6:
+            self.change_ptype()  # Update problem type. Re-copy the const props
+            # Get the correct, updated final props
+            outputs = self.read_state('F')
+            T, P, H, S, D, U = outputs
         elif self.final_type is None:
             tkinter.messagebox.showerror('Error', 'Must input exactly two '
                                          'state variables '
@@ -646,8 +671,10 @@ class GasProps(ttk.Frame):
                 i += 1
 
     def change_phi(self, *args):
-        """Change the equivalence ratio by changing fuel content,
-        holding diluent/o2 ratio constant.
+        """Change the equivalence ratio.
+
+        Change fuel content, holding diluent/o2 ratio constant. This could be
+        updated to use the new cantera method set_equivalence_ratio.
         """
         if self.phi.get() == '':
             return
@@ -698,7 +725,7 @@ class GasProps(ttk.Frame):
         self.calculate_final()  # Re-calculate
 
     def read_state(self, key):
-        """ Read the entire input state, convert to mks units. """
+        """Read the entire input state, convert to mks units."""
         # Read thermodynamic state variables
         if key == 'I':
             inputs = [self.T, self.P, self.H, self.S, self.D, self.U]
@@ -720,7 +747,7 @@ class GasProps(ttk.Frame):
 
 
 def convert_units(vals, units, to_mks):
-    """ Convert between unit systems.
+    """Convert between unit systems.
 
     vals: list of floats
         values to be displayed in the following order:
@@ -729,12 +756,11 @@ def convert_units(vals, units, to_mks):
         thermal expansion coefficient].
         vals can be either the first 6, all 13, or the last 7 items.
     units:
-        list of strings for units of [Pressure, Length]
+        list of strings for units of [Pressure, Length, Energy, Amount]
     to_mks: bool
         if True, the vals are already in the system specified by "units" and
         must be converted to mks. If False, the vals are in mks units and
         should be converted to the system specified by "units"
-
     """
     P_units = {'Pa': 1, 'kPa': 1e-3, 'atm': 1/cantera.one_atm}
     L_units = {'m': 1, 'cm': 100, 'mm': 1000, 'ft': 3.28084, 'in': 39.3701}
@@ -772,7 +798,7 @@ def convert_units(vals, units, to_mks):
 
 
 def equivalence_ratio(gas, gas_list):
-    """ Calculate the equivalence ratio of the mixture
+    """Calculate the equivalence ratio of the mixture.
 
     input: cantera Solution, mixture components in list format
     Returns the equivalence ratio and a list of hydrocarbons
