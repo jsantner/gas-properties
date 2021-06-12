@@ -1,6 +1,8 @@
 # gas-properties
 GUI to simply and easily calculate gas properties using cantera.
 
+![image](https://user-images.githubusercontent.com/16088743/121784497-760c4700-cbb4-11eb-9342-9f23ec316f84.png)
+
 This program was created when I tried to help someone with a problem by having them install
 GasEq (Chris Morley, http://www.gaseq.co.uk/).
 GasEq is a very useful GUI program for calculating gas-phase thermochemistry properties for those who are not comfortable with
@@ -27,7 +29,7 @@ To run:
 -------
 From a windows command line:
 
-    python -i path\to\gas-properties.py
+    python -i PATH\TO\gas_properties.py
 
 Or, run gas-properties.py from your preffered python IDE (e.g. spyder, IDLE, etc.)
 
