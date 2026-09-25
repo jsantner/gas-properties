@@ -8,6 +8,7 @@ Created by Jeffrey Santner
 import os
 import tkinter
 from tkinter import ttk
+import tkinter.filedialog
 import numpy as np
 
 import cantera
@@ -244,9 +245,9 @@ class GasProps(ttk.Frame):
         self.final_spec = final_spec
         self.final_mole_frac = final_mole_frac
 
-        # Initialize chemistry file to therm.cti
+        # Initialize chemistry file to therm
         path = os.path.dirname(os.path.realpath(__file__))
-        self.chemfile = os.path.join(path, 'therm.cti')
+        self.chemfile = os.path.join(path, 'therm.yaml')
 
     def change_units(self):
         """Change the unit system.
@@ -379,7 +380,7 @@ class GasProps(ttk.Frame):
         # Allows user to choose thermochemistry file from Menu.
         self.chemfile = tkinter.filedialog.askopenfilename(
                 title='Select Chemistry File', initialdir=os.getcwd(),
-                filetypes=[("Cantera Chemistry File (*.cti)", "*.cti")])
+                filetypes=[("Cantera Chemistry File (*.yaml)", "*.yaml")])
 
     def on_quit(self):
         """Exit program."""
@@ -483,6 +484,7 @@ class GasProps(ttk.Frame):
             elif U is not None and D is not None:
                 self.initial_type = 'UV'
             else:
+                print([T, P, H, S, D, U, V])
                 tkinter.messagebox.showerror('Error', 'Must input exactly two '
                                              'state variables '
                                              '(TP, HP, SP, SD, UV)')
